@@ -1,0 +1,14 @@
+{
+  "name": "whoopigo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A themed, live family game show for every generation.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/*.test.js",
+    "check": "node --check server.js && node --check public/app.js && node --check public/art.js && node --check lib/game.js && node --check lib/content.js"
+  }
+}

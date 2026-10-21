@@ -70,4 +70,3 @@ The server binds to `0.0.0.0` and uses the `PORT` environment variable, defaulti
 ## Artwork
 
 The hero artwork is original AI-generated artwork created with the built-in image-generation tool. Its production prompt is saved in `docs/art-direction.md`. Game illustrations and interaction graphics are authored in SVG and CSS. The app loads no third-party trackers, fonts, stock photos, or external media.
-
