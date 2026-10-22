@@ -4,11 +4,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Game, GameError } from './lib/game.js';
 import { fileStorage } from './lib/storage.js';
+import { imageStore } from './lib/images.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
-export function createApp({ storage } = {}) {
+export function createApp({ storage, images = imageStore() } = {}) {
   const game = new Game({ storage }), limits = new Map();
+  images.prune();
   const timer = setInterval(() => game.tick(), 250); timer.unref();
+  const imageCleanup = setInterval(() => images.prune(), 15 * 60 * 1000); imageCleanup.unref();
   const server = http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -23,19 +26,32 @@ export function createApp({ storage } = {}) {
         if (limits.size > 1000) for (const [key, value] of limits) if (value.until < Date.now()) limits.delete(key);
         if (!limit || limit.until < Date.now()) { limit = { count: 0, until: Date.now() + 60000 }; limits.set(ip, limit); }
         if (++limit.count > 600) throw new GameError('Too many requests. Please wait a moment.', 429);
-        let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 50000) throw new GameError('That request is too large.', 413); }
+        const maximumBody = url.pathname === '/api/uploads' ? 950000 : 60000;
+        const chunks = []; let bytes = 0;
+        for await (const chunk of req) { bytes += chunk.length; if (bytes > maximumBody) throw new GameError('That request is too large.', 413); chunks.push(chunk); }
+        const body = Buffer.concat(chunks).toString('utf8');
         let data; try { data = JSON.parse(body || '{}'); } catch { throw new GameError('Invalid request.'); }
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new GameError('Invalid request.');
+        if (url.pathname === '/api/uploads') return json({ image: images.put(data.image) }, 201);
         if (url.pathname === '/api/rooms') {
+          if (Array.isArray(data.hiding) && data.hiding.some(q => !images.has(q?.image))) throw new GameError('A picture has expired. Upload the saved pack again.');
           const room = game.create(data); return json({ code: room.code, token: room.hostToken }, 201);
         }
-        const match = url.pathname.match(/^\/api\/rooms\/(\d{6})\/(join|action|answer)$/);
+        const match = url.pathname.match(/^\/api\/rooms\/(\d{6})\/(join|action|answer|tables|host-answer)$/);
         if (!match) throw new GameError('Not found.', 404);
         const [, code, action] = match;
         if (action === 'join') { const team = game.join(code, data.name); return json({ token: team.id, name: team.name }); }
         if (action === 'action') game.action(code, data.token, data.action, data.difficulty);
         if (action === 'answer') game.answer(code, data.token, data.value);
+        if (action === 'tables') game.addTable(code, data.token, data.name);
+        if (action === 'host-answer') game.hostAnswer(code, data.token, data.teamId, data.value, { index: data.index, phase: data.phase });
         return json({ ok: true });
+      }
+      const media = url.pathname.match(/^\/media\/([a-f0-9]{48}\.jpg)$/);
+      if (media && ['GET', 'HEAD'].includes(req.method)) {
+        const content = images.get(media[1]);
+        res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, max-age=300', 'Content-Length': content.length });
+        return res.end(req.method === 'HEAD' ? undefined : content);
       }
       const stream = url.pathname.match(/^\/api\/rooms\/(\d{6})\/events$/);
       if (stream && req.method === 'HEAD') { game.room(stream[1]); res.writeHead(200); return res.end(); }
@@ -62,10 +78,11 @@ export function createApp({ storage } = {}) {
       res.end(JSON.stringify({ error: error instanceof GameError ? error.message : 'Something went wrong. Please try again.' }));
     }
   });
-  server.on('close', () => clearInterval(timer));
+  server.on('close', () => { clearInterval(timer); clearInterval(imageCleanup); });
   return { server, game };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { server } = createApp({ storage: fileStorage(process.env.DATA_FILE || './data/rooms.json') });
+  const dataFile = process.env.DATA_FILE || './data/rooms.json';
+  const { server } = createApp({ storage: fileStorage(dataFile), images: imageStore(path.join(path.dirname(path.resolve(dataFile)), 'uploads')) });
   server.listen(Number(process.env.PORT) || 3000, '0.0.0.0', () => console.log(`Whoopigo is ready at http://localhost:${server.address().port}`));
 }

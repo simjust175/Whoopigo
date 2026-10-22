@@ -15,6 +15,6 @@ export function mosaic(seed) {
   return `<div class="reveal-tiles fine-mosaic" aria-hidden="true">${tileOrder(seed).map((rank, i) => `<div class="reveal-tile" data-rank="${rank}" style="--tile:${i}"></div>`).join('')}</div>`;
 }
 export function sceneImage(src, label = 'Puzzle scene') {
-  if (!/^\/assets\/puzzles\/[a-z0-9-]+\.(jpg|png|webp)$/.test(src || '')) return '';
-  return `<img class="puzzle-image" src="${src}" alt="${label}" draggable="false" decoding="async">`;
+  if (!/^(\/assets\/puzzles\/[a-z0-9-]+\.(jpg|png|webp)|\/media\/[a-f0-9]{48}\.jpg)$/.test(src || '')) return '';
+  return `<img class="puzzle-image${src.startsWith('/media/') ? ' user-picture' : ''}" src="${src}" alt="${label}" draggable="false" decoding="async">`;
 }

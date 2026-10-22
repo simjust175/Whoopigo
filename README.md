@@ -2,7 +2,7 @@
 
 A room full of family. A little friendly competition.
 
-Whoopigo is a browser-based family game show for mixed-age teams, with a host screen, a separate projector view, and one browser controller per team. This repository contains a working **playable preview**, not a finished commercial service.
+Whoopigo is a browser-based family game show for mixed-age teams. Play with one browser controller per table, or use **one-projector mode**: one host manages every table and records their answers. A separate projector view is available in either mode. This repository contains a working **playable preview**, not a finished commercial service.
 
 ## Run locally
 
@@ -18,9 +18,25 @@ Choose **Take a little peek** for a solo practice round. Choose a game card to c
 
 Other devices cannot use your computer's `localhost` URL. For a local network test, use the computer's LAN address and allow the development server through the firewall as appropriate; for remote players, publish to an HTTPS host.
 
+## Your own What's Hiding? pictures
+
+Open **What's Hiding? → Upload pictures & write answers** (also available when setting up the full evening). Add a JPEG, PNG or WebP, a question, four different choices, the correct answer, and an optional story for the reveal. Save up to 12 rounds and edit or remove them later. Check **Use my picture pack** in setup to replace the built-in reveal scenes. Full evenings use all saved custom picture rounds.
+
+Pictures are resized to a maximum 1600-pixel edge and encoded as JPEG in the browser, removing camera metadata. Portrait pictures are contained in the mosaic frame without cropping. Source files can be up to 15 MB; shared JPEGs are capped at 700 KB. The pack lives in IndexedDB on that browser; it is uploaded only when creating a room. Clearing browser storage removes saved packs. Account sync and pack import/export are not implemented.
+
+Server image copies live in `data/uploads/` (or alongside `DATA_FILE`), outside the static directory and ignored by Git. Opaque image links are unlisted, but anyone who can view the room can view its images: this is not account-authenticated private photo storage. Links expire after 24 hours; expired files are pruned at startup, during upload and every 15 minutes. The store is capped at 128 MB / 300 files. Persist and back up the uploads directory with the room data on your host.
+
+## One projector, no table phones
+
+In game setup choose **One projector · host records all answers** and enter one table name per line (1–50 unique names). The tables are created immediately. The host can add tables in the lobby or between rounds. Public controller joins are disabled in this mode.
+
+Recommended flow: every table discusses privately, then shows an A/B/C/D card together. The host records each table's choice, corrects mistakes if needed, and presses Reveal. Memory rounds let the host record three chosen details per table; Crowd still has a vote phase and a prediction phase. The game calculates points and keeps one shared scoreboard. Printable table cards are available at `/answer-cards.html` and linked from the lobby.
+
+When a question timer finishes, projector mode waits for the host rather than scoring automatically. Memory study phases still transition after 18 seconds. The Tables button shows every table's score. With an extended display, open the separate projector tab and keep the recording panel on the host laptop; alternatively run the host view on the shared screen after all tables have committed. This uses one projector either way.
+
 ## The games
 
-- **What's Hiding?** — six detailed original illustrated places emerge through a synchronized 384-square mosaic over 45 seconds. Correct answers earn 100 points.
+- **What's Hiding?** — six detailed original illustrated places, or your own picture pack, emerge through a synchronized 384-square mosaic over 45 seconds. Correct answers earn 100 points.
 - **Guess the Crowd** — tables vote privately, then predict the most popular option. Tied favourites count; no votes means no points.
 - **Family Detectives** — enter personal family questions, four answer choices, and an optional story. Fictional sample questions are clearly identified and must be replaced for a real family event.
 - **Something Changed!** — study one of three original scenes for 18 seconds, then find three changed details among nine choices. Changes include missing objects, opened objects, and altered pictures as well as colours. Partial credit and a before/after comparison are included.
@@ -52,7 +68,7 @@ npm run check
 npm test
 ```
 
-21 tests cover host authorization, answer secrecy, duplicate submissions, scoring, timed transitions, pause/resume, crowd ties, empty voting, partial memory scoring, custom questions, a complete five-game evening, a 50-team simulated round, disk recovery, corrupt-backup protection, late joining, asset completeness, reveal synchronization, and reconnect probes. This is not a substitute for real event load or usability testing.
+32 tests cover the original game flow plus custom-picture validation and scoring, upload/expiry/persistence, projector table management, host-only answer recording, corrected and delayed entries, host-paced transitions, projector memory/crowd rounds, public-state secrecy, and restart recovery. This is not a substitute for real event load or usability testing.
 
 ## Publishing
 
@@ -66,7 +82,7 @@ The server binds to `0.0.0.0` and uses the `PORT` environment variable, defaulti
 - New teams can join in the lobby or between rounds. Existing teams can reconnect with their browser token.
 - Add room moderation, team removal, nonvisual alternatives for picture puzzles, and account-based host recovery.
 - Expand and review the question packs for accuracy, family suitability, and different reading levels.
-- Add photo/video questions, licensed music if desired, and fully bespoke seasonal artwork.
+- Add video rounds, licensed music if desired, and fully bespoke seasonal artwork.
 - Accounts, billing, physical clickers, and telephone dial-in are not implemented.
 
 ## Artwork
