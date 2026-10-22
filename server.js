@@ -43,7 +43,7 @@ export function createApp({ storage, images = imageStore() } = {}) {
         if (action === 'join') { const team = game.join(code, data.name); return json({ token: team.id, name: team.name }); }
         if (action === 'action') game.action(code, data.token, data.action, data.difficulty);
         if (action === 'answer') game.answer(code, data.token, data.value);
-        if (action === 'tables') game.addTable(code, data.token, data.name);
+        if (action === 'tables') game.addTables(code, data.token, data.names ?? [data.name]);
         if (action === 'host-answer') game.hostAnswer(code, data.token, data.teamId, data.value, { index: data.index, phase: data.phase });
         return json({ ok: true });
       }

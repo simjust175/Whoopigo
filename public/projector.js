@@ -34,18 +34,27 @@ export function bindProjector(s, { api, key, modal, toast, icon, escape: esc }) 
       m.el.querySelector('#save-table-memory').disabled = chosen.size !== 3;
     });
     m.el.querySelector('#save-table-memory').onclick = async e => {
-      e.currentTarget.disabled = true;
+      const button = e.currentTarget; button.disabled = true;
       try { await api(`/api/rooms/${s.code}/host-answer`, { token: key, teamId: team.id, value: [...chosen], index: s.index, phase: s.phase }); m.close(); }
-      catch (error) { toast(error.message); e.currentTarget.disabled = false; }
+      catch (error) { toast(error.message); button.disabled = false; }
     };
   });
   const addTable = document.querySelector('#add-projector-table');
   if (addTable) addTable.onclick = () => {
-    const m = modal(`<p class="eyebrow">THERE’S ROOM FOR ONE MORE</p><h2 id="modal-title">Add a table.</h2><form id="add-table-form"><label>Table name<input name="name" maxlength="28" required placeholder="The Bright Sparks"></label><button class="button primary full-width">Add table ${icon('arrow')}</button></form>`);
-    m.el.querySelector('form').onsubmit = async e => {
-      e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true;
-      try { await api(`/api/rooms/${s.code}/tables`, { token: key, name: new FormData(e.target).get('name') }); m.close(); }
-      catch (error) { toast(error.message); button.disabled = false; }
+    const remaining = 50 - s.teams.length;
+    const m = modal(`<p class="eyebrow">EVERYONE GETS A PLACE</p><h2 id="modal-title">Make room for more.</h2><p>You have ${s.teams.length} tables. Add one name per line; new tables start with zero points.</p><form id="add-table-form"><label>New table names<textarea name="names" maxlength="1450" rows="4" required placeholder="The Bright Sparks&#10;The Grand Guessers"></textarea></label><p class="table-form-status" aria-live="polite">Space for ${remaining} more tables.</p><p class="form-error" role="alert" hidden></p><button class="button primary full-width" ${remaining ? '' : 'disabled'}>Add tables ${icon('arrow')}</button></form>`);
+    const form = m.el.querySelector('form'), field = form.elements.names, button = form.querySelector('button'), errorBox = form.querySelector('.form-error');
+    field.oninput = () => {
+      const count = field.value.split(/\r?\n/).filter(n => n.trim()).length;
+      form.querySelector('.table-form-status').textContent = count ? `${count} new table${count === 1 ? '' : 's'} · ${s.teams.length + count}/50 total` : `Space for ${remaining} more tables.`;
+      button.disabled = !count || count > remaining;
+      errorBox.hidden = true;
+    };
+    form.onsubmit = async e => {
+      e.preventDefault(); button.disabled = true; errorBox.hidden = true;
+      const names = field.value.split(/\r?\n/).map(n => n.trim()).filter(Boolean);
+      try { await api(`/api/rooms/${s.code}/tables`, { token: key, names }); m.close(); toast(`${names.length} table${names.length === 1 ? '' : 's'} added. Everyone's in!`); }
+      catch (error) { errorBox.textContent = error.message; errorBox.hidden = false; button.disabled = false; }
     };
   };
   const showTables = document.querySelector('#show-tables');

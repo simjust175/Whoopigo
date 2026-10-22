@@ -131,3 +131,25 @@ test('HTTP image upload, custom game creation, host capture and private media se
   assert.equal(room.teams[0].score, 100); assert.equal(room.teams[1].score, 0);
   assert.equal((await post('/api/rooms', { game: 'hiding', hiding: [custom] })).status, 400);
 });
+
+test('Batch tables are atomic, bounded, authorized and available between rounds', () => {
+  const { game, room } = projector();
+  const original = room.teams.length;
+  assert.throws(() => game.addTables(room.code, 'wrong', ['Guests']), /Only the host/);
+  assert.throws(() => game.addTables(room.code, room.hostToken, ['Guests', 'guests']), /different name/);
+  assert.equal(room.teams.length, original);
+  assert.throws(() => game.addTables(room.code, room.hostToken, ['Guests', 'x'.repeat(29)]), /28 characters/);
+  assert.equal(room.teams.length, original);
+  game.action(room.code, room.hostToken, 'start');
+  assert.throws(() => game.addTables(room.code, room.hostToken, ['Guests']), /between rounds/);
+  game.action(room.code, room.hostToken, 'reveal');
+  const added = game.addTables(room.code, room.hostToken, ['Guests', 'Cousins']);
+  assert.equal(added.length, 2); assert.ok(added.every(t => t.score === 0));
+  const remaining = 50 - room.teams.length;
+  game.addTables(room.code, room.hostToken, Array.from({length:remaining}, (_,i) => `Extra ${i}`));
+  assert.equal(room.teams.length, 50);
+  assert.throws(() => game.addTables(room.code, room.hostToken, ['Overflow']), /50 tables/);
+  game.action(room.code, room.hostToken, 'next');
+  game.hostAnswer(room.code, room.hostToken, added[0].id, 0, {index:room.index, phase:room.phase});
+  assert.equal(room.answers.get(added[0].id).value, 0);
+});
