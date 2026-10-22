@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 570" fill="none">
   <style>
-    .bob{animation:bob 5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.delay{animation-delay:-2s}.wink{animation:wink 6s infinite;transform-origin:528px 254px}.twirl{animation:twirl 18s linear infinite;transform-box:fill-box;transform-origin:center}
-    @keyframes bob{50%{translate:0 -12px;rotate:2deg}}@keyframes twirl{to{rotate:360deg}}@keyframes wink{0%,44%,48%,100%{scale:1 1}46%{scale:1 .12}}
+    .bob{animation:bob 5s ease-in-out infinite}.delay{animation-delay:-2s}.wink{animation:wink 6s infinite;transform-origin:528px 254px}.twirl{animation:twirl 18s linear infinite;transform-box:fill-box;transform-origin:center}
+    @keyframes bob{50%{translate:0 -12px}}@keyframes twirl{to{rotate:360deg}}@keyframes wink{0%,44%,48%,100%{scale:1 1}46%{scale:1 .12}}
     @media(prefers-reduced-motion:reduce){*{animation:none!important}}
   </style>
   <ellipse cx="374" cy="486" rx="235" ry="31" fill="#2c0e6e" opacity=".28"/>
@@ -53,3 +53,4 @@
   <path d="M184 76q30-31 57-5" stroke="#87e8db" stroke-width="8" stroke-linecap="round"/>
   <path d="M427 481q22 21 44-1" stroke="#ffb7dc" stroke-width="8" stroke-linecap="round"/>
 </svg>
+
