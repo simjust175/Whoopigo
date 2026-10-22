@@ -30,7 +30,7 @@ function note(type = 'tap') {
 }
 function celebrate() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  $('#confetti').innerHTML = Array.from({ length: 60 }, (_, i) => `<i style="--x:${Math.random() * 100}vw;--r:${Math.random() * 720}deg;--d:${Math.random() * 1.2}s;--c:${['#ed987a', '#e8b958', '#7a9c83', '#eee4ca'][i % 4]}"></i>`).join('');
+  $('#confetti').innerHTML = Array.from({ length: 60 }, (_, i) => `<i style="--x:${Math.random() * 100}vw;--r:${Math.random() * 720}deg;--d:${Math.random() * 1.2}s;--c:${['#ff9bc9', '#ffdc55', '#bff476', '#ae84f5'][i % 4]}"></i>`).join('');
   setTimeout(() => $('#confetti').replaceChildren(), 5500);
 }
 async function api(path, data) {
@@ -46,8 +46,8 @@ function renderHome() {
   $('#app').innerHTML = `${header()}
     <main class="home-main">
       <section class="hero">
-        <div class="hero-art" aria-hidden="true"><img src="/assets/party-hero.png" alt="" fetchpriority="high"><div class="hero-sticker"><span>8 → 80</span><small>every generation<br>gets a turn</small></div></div>
-        <div class="hero-copy"><p class="eyebrow"><span class="tiny-star">✳</span> GOOD COMPANY. GREAT GAMES.</p><h1>A room full of family.<br>A little <em>friendly<br>competition.</em></h1><p class="hero-description">Bring everyone to the table. Five wonderfully different<br class="desktop"> games. One evening that feels like <i>you.</i></p><div class="hero-actions"><button class="button primary" data-setup="playlist">Let’s make a night of it ${icon('arrow')}</button><button class="text-button try-button" data-demo>Take a little peek ${icon('play')}</button></div><div class="hero-meta"><span>${icon('users')} Ages 8 to 80</span><span>${icon('screen')} One big screen</span><span>${icon('spark')} Everyone plays</span></div></div>
+        <div class="hero-art" aria-hidden="true"><img src="/assets/game-night.svg" alt="" fetchpriority="high"><div class="hero-sticker"><span>8 → 80</span><small>every generation.<br>game on.</small></div></div>
+        <div class="hero-copy"><p class="eyebrow"><span class="tiny-star">✳</span> THE WHOLE ROOM. IN ON THE FUN.</p><h1>Big laughs.<br>Wild guesses.<br><em>Everyone’s in.</em></h1><p class="hero-description">Five games. All your favourite people.<br class="desktop"> No spectators. Just <i>one more round.</i></p><div class="hero-actions"><button class="button primary" data-setup="playlist">Let’s make a night of it ${icon('arrow')}</button><button class="text-button try-button" data-demo>Take a little peek ${icon('play')}</button></div><div class="hero-meta"><span>${icon('users')} Ages 8 to 80</span><span>${icon('screen')} One big screen</span><span>${icon('spark')} Everyone plays</span></div></div>
       </section>
       <section class="game-section" id="games"><div class="section-heading"><div><p class="eyebrow">PICK YOUR KIND OF FUN</p><h2>What shall we play?</h2></div><div class="theme-control"><span>Set the mood</span><button class="theme-button" data-themes>${themeInfo[theme].icon} ${themeInfo[theme].short} <span>⌄</span></button></div></div>
       <div class="game-grid">${games.map((g, i) => `<button class="game-card ${g.color}" data-setup="${g.id}"><div class="card-art"><span class="game-number">0${i + 1}</span>${gameArt(g.id)}<span class="card-play">${icon('arrow')}</span></div><div class="card-copy"><p class="card-label">${g.label}</p><h3>${g.name}</h3><p>${g.description}</p><div class="card-meta">${icon('clock')} ${g.time}<span>Team play</span></div></div></button>`).join('')}</div></section>
