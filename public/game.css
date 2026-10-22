@@ -1,0 +1,142 @@
+/* All visual upgrades are scoped to game rooms. The home page is unchanged. */
+body[data-room] { background: radial-gradient(ellipse at 50% 0%, #f1e6cf 0, #faf7ee 60%); }
+body[data-room] .play-layout { max-width: 1360px; padding: 22px 4% 0; }
+body[data-room] .room-header { height: 72px; }
+body[data-room] .round-heading { margin-bottom: 22px; }
+body[data-room] .round-tag { background: #244c3f; color: #f7e8be; padding: 8px 18px; }
+body[data-room] .timer { border: 1px solid #d7c9aa; background: #fffcf3; min-width: 92px; font-size: 16px; }
+body[data-room] .question-stage { position: relative; }
+body[data-room] .question-stage h1 { font-size: clamp(30px, 3vw, 46px); margin: 10px auto 26px; max-width: 1000px; }
+body[data-room] .illustrated-stage .stage-body { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,1fr); align-items: center; gap: 38px; text-align: left; }
+body[data-room] .cinematic-board { width: 100%; max-width: none; aspect-ratio: 3/2; border: 7px solid #fffcf4; outline: 1px solid #dfd4bf; border-radius: 18px; overflow: hidden; position: relative; margin: 0; background: #e8dbc1; box-shadow: 0 22px 50px #4a3d2519, 0 3px 7px #4a3d2512; }
+body[data-room] .puzzle-image { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+body[data-room] .fine-mosaic { grid-template-columns: repeat(24,minmax(0,1fr)); grid-template-rows: repeat(16,minmax(0,1fr)); perspective: 1000px; }
+body[data-room] .fine-mosaic .reveal-tile { border: .5px solid #f6e8b923; background: #315f4e; box-shadow: inset 1px 1px 1px #f2e8bd15, inset -1px -1px 1px #092e2220; transition: transform .65s cubic-bezier(.2,.7,.2,1), opacity .5s; transform-origin: top center; }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(3n) { background: #426d57; }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(7n) { background: #567b5c; }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(11n) { background: #7e8c62; }
+body[data-room] .fine-mosaic .reveal-tile.revealed { transform: rotateX(105deg) scale(.65); opacity: 0; filter: none; pointer-events: none; }
+body[data-room] .mosaic-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 175px; height: 175px; border: 1px solid #e3ce9180; border-radius: 50%; background: #244c3fdb; color: #efdaa7; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 15px; transition: opacity .6s, scale .6s; pointer-events: none; }
+body[data-room] .mosaic-seal .icon { width: 48px; height: 48px; animation: seal-turn 10s linear infinite; }
+body[data-room] .mosaic-seal span { font-size: 8px; letter-spacing: 2px; }
+body[data-room] .mosaic-seal.gone { opacity: 0; scale: 1.12; }
+body[data-room] .reveal-caption { display: flex; justify-content: space-between; gap: 10px; margin: 16px 3px 9px; color: #6e795e; font-size: 11px; }
+body[data-room] .reveal-caption b { font-weight: 600; font-variant-numeric: tabular-nums; }
+body[data-room] .reveal-progress { height: 3px; background: #e4e2d3; border-radius: 5px; overflow: hidden; }
+body[data-room] .reveal-progress i { display: block; width: 0; height: 100%; background: #a98b49; transition: width .2s linear; }
+body[data-room] .choice-intro { font-family: Georgia,serif; font-size: 30px; color: #274c3e; line-height: 1.2; margin-bottom: 22px; }
+body[data-room] .choice-intro em { color: #8b8b5c; }
+body[data-room] .illustrated-stage .answer-grid { grid-template-columns: 1fr; gap: 11px; margin: 0; }
+body[data-room] .answer-option { border-radius: 12px; min-height: 64px; font-size: 17px; padding: 13px 17px; box-shadow: 0 3px 0 #244c3f09; animation: answer-arrive .45s calc(var(--answer-index) * .08s) both; }
+body[data-room] .answer-option.selected { box-shadow: 0 0 0 3px #73906526; }
+body[data-room] .answer-letter { width: 34px; height: 34px; border-radius: 9px; font-weight: bold; }
+body[data-room] button.answer-option:disabled { opacity: .8; }
+body[data-room] .stage-response .answer-status { justify-content: flex-start; text-align: left; margin-top: 17px; line-height: 1.6; font-size: 12px; }
+body[data-room] .scene-badge { position: absolute; bottom: 12px; left: 12px; background: #fffaedec; padding: 7px 11px; border-radius: 5px; font-size: 8px; letter-spacing: 1.6px; color: #40543f; }
+body[data-room] .study-message h2 { font-size: 34px; margin: 15px 0; }
+body[data-room] .study-message p { font-size: 13px; line-height: 1.8; }
+body[data-room] .study-message .points-badge { margin: 20px 0 0; }
+body[data-room] .study-orbit { display: inline-block; color: #b48d44; font-size: 64px; line-height: 1; animation: seal-turn 18s linear infinite; margin: 10px 0; }
+body[data-room] .memory-choices .stage-hint { font-family: Georgia,serif; font-size: 25px; color: #294b3d; line-height: 1.25; }
+body[data-room] .selection-dots { display: flex; gap: 10px; margin: 20px 0; }
+body[data-room] .selection-dots i { font-style: normal; display: grid; place-items: center; width: 32px; height: 32px; border: 1px dashed #b9bea7; border-radius: 50%; font-size: 12px; color: #7f876b; transition: .25s; }
+body[data-room] .selection-dots .filled { color: #fff9e8; background: #42664e; border: 1px solid #42664e; transform: scale(1.08); }
+body[data-room] .object-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
+body[data-room] .object-option { border-radius: 9px; justify-content: space-between; min-height: 47px; padding: 10px 12px; font-size: 12px; text-align: left; text-transform: none; }
+body[data-room] .object-option.selected { box-shadow: inset 0 0 0 1px #6b8b6a; }
+body[data-room] .quiz-stage { padding: 8px 0 20px; max-width: 1000px; margin: auto; }
+body[data-room] .quiz-stage .answer-grid { margin: 30px auto 0; gap: 16px; }
+body[data-room] .quiz-stage .answer-option { min-height: 86px; font-size: 21px; }
+body[data-room] .quiz-stage .answer-status { justify-content: center; }
+body[data-room] .game-emblem { position: relative; width: 96px; height: 96px; border: 1px solid #dacba5; background: radial-gradient(circle at 35% 30%,#fff7dd,#e9d5a8); display: grid; place-items: center; border-radius: 28px; margin: 24px auto; box-shadow: 0 12px 25px #85744915; transform: rotate(-7deg); animation: emblem-in .65s cubic-bezier(.2,.8,.3,1); }
+body[data-room] .game-emblem>.icon { width: 43px; height: 43px; stroke: #96733d; transform: rotate(7deg); }
+body[data-room] .game-emblem i { position: absolute; background: #d9b568; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); left: -15px; top: 15px; animation: twinkle 3s infinite; }
+body[data-room] .game-emblem i:nth-of-type(2) { left: auto; right: -23px; top: 48px; width: 12px; height: 12px; animation-delay: -1s; }
+body[data-room] .game-emblem i:nth-of-type(3) { left: 18px; top: auto; bottom: -17px; width: 5px; height: 5px; }
+body[data-room] .game-emblem.crowd { background: radial-gradient(circle at 30% 25%,#edf2dd,#bed0b5); border-color: #aebb9e; }
+body[data-room] .game-emblem.crowd>.icon { stroke: #53785d; }
+body[data-room] .game-emblem.family { background: radial-gradient(circle at 30% 25%,#fae7d7,#dfb7a6); border-color: #d0ab99; }
+body[data-room] .pause-ribbon { background: #294b3fe8; color: #f5e7bc; border: 1px solid #d5bb72; border-radius: 8px; padding: 14px; font-size: 11px; letter-spacing: 2px; margin: 20px auto 0; }
+body[data-room] .host-controls { margin-top: 24px; border: 1px solid #dedac8; border-radius: 12px; background: #fffdf5; padding: 13px 18px; }
+body[data-room] .host-label { color: #6a775e; }
+body[data-room] .room-bottom { border: none; }
+body[data-room] .result-picture { width: 100%; height: auto; aspect-ratio: 3/2; overflow: hidden; border: 6px solid #fffaf0; border-radius: 16px; box-shadow: 0 13px 30px #57412518; }
+body[data-room] .result-picture .puzzle-image { animation: picture-arrive .9s cubic-bezier(.2,.7,.3,1); }
+body[data-room] .results-stage { grid-template-columns: minmax(0,1.65fr) minmax(280px,1fr); gap: 38px; align-items: start; padding-top: 0; }
+body[data-room] .result-main h1 { margin: 8px 0 22px; }
+body[data-room] .correct-answer { font-size: 28px; margin-top: 20px; }
+body[data-room] .score-panel { margin-top: 22px; border-color: #d9cfb8; }
+body[data-room] .team-list { overflow-x: hidden; }
+body[data-room] .team-list .earned { right: 0; }
+body[data-room] .score-panel .team-row:first-child .team-place { background: #edce83; }
+body[data-room] .score-panel .team-row { animation-delay: min(calc(var(--i) * .06s),.6s); }
+body[data-room] .comparison-tabs { display: flex; justify-content: center; gap: 5px; padding: 5px; border-radius: 25px; border: 1px solid #d8d3bf; width: fit-content; margin: 15px auto; background: #ede9dc; }
+body[data-room] .comparison-tabs button { border-radius: 20px; padding: 7px 23px; background: transparent; font-size: 12px; min-height: 38px; }
+body[data-room] .comparison-tabs button.active { background: #294f3f; color: #fff5d9; box-shadow: 0 2px 6px #173f3720; }
+body[data-room] .change-labels { flex-wrap: wrap; }
+body[data-room] .change-labels span { text-transform: none; }
+@keyframes seal-turn { to { rotate: 360deg; } }
+@keyframes answer-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes emblem-in { from { opacity: 0; transform: rotate(-20deg) scale(.6); } to { opacity: 1; transform: rotate(-7deg) scale(1); } }
+@keyframes picture-arrive { from { scale: 1.06; filter: brightness(1.2); } to { scale: 1; filter: brightness(1); } }
+@media(min-width:1550px) { body[data-room] .play-layout { max-width: 1540px; } body[data-room] .illustrated-stage .stage-body { gap: 55px; } body[data-room] .answer-option { min-height: 78px; font-size: 22px; } }
+@media(max-width:800px) {
+  body[data-room] .illustrated-stage .stage-body { grid-template-columns: minmax(0,1.35fr) minmax(230px,1fr); gap: 22px; }
+  body[data-room] .answer-option { font-size: 14px; padding: 10px; min-height: 55px; gap: 10px; }
+  body[data-room] .choice-intro { font-size: 25px; margin-bottom: 15px; }
+  body[data-room] .study-message h2 { font-size: 26px; }
+  body[data-room] .results-stage { gap: 25px; }
+}
+@media(max-width:640px) {
+  body[data-room] .play-layout { padding: 18px 18px 0; }
+  body[data-room] .room-title { display: none; }
+  body[data-room] .room-tools .sound-toggle { display: inline-flex; }
+  body[data-room] .question-stage h1 { font-size: 27px; margin: 12px auto 20px; }
+  body[data-room] .question-stage>.eyebrow { font-size: 7px; letter-spacing: 1.3px; }
+  body[data-room] .illustrated-stage .stage-body { display: block; }
+  body[data-room] .cinematic-board { border-width: 4px; border-radius: 12px; }
+  body[data-room] .mosaic-seal { width: 120px; height: 120px; gap: 10px; }
+  body[data-room] .mosaic-seal .icon { width: 33px; height: 33px; }
+  body[data-room] .mosaic-seal span { font-size: 6px; letter-spacing: 1.2px; }
+  body[data-room] .reveal-caption { font-size: 9px; margin-top: 12px; }
+  body[data-room] .choice-intro { display: none; }
+  body[data-room] .illustrated-stage .answer-grid { grid-template-columns: 1fr 1fr; margin: 20px 0 0; gap: 9px; }
+  body[data-room] .answer-option { min-height: 67px; font-size: 13px; padding: 10px; }
+  body[data-room] .answer-letter { width: 25px; height: 25px; font-size: 10px; border-radius: 7px; }
+  body[data-room] .stage-response .answer-status { justify-content: center; text-align: center; font-size: 11px; }
+  body[data-room] .study-message { text-align: center; padding: 18px 0 0; }
+  body[data-room] .study-message .study-orbit { display: none; }
+  body[data-room] .study-message h2 { font-size: 25px; margin: 5px 0 10px; }
+  body[data-room] .study-message h2 br { display: none; }
+  body[data-room] .study-message p { font-size: 11px; }
+  body[data-room] .memory-choices { text-align: center; }
+  body[data-room] .memory-choices .stage-hint { font-size: 21px; margin-top: 22px; }
+  body[data-room] .selection-dots { justify-content: center; margin: 15px 0; }
+  body[data-room] .object-options { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  body[data-room] .object-option { font-size: 11px; padding: 9px; min-height: 47px; }
+  body[data-room] .quiz-stage .answer-grid { grid-template-columns: 1fr; margin-top: 23px; gap: 10px; }
+  body[data-room] .quiz-stage .answer-option { font-size: 17px; min-height: 65px; }
+  body[data-room] .game-emblem { width: 75px; height: 75px; margin: 20px auto; border-radius: 22px; }
+  body[data-room] .game-emblem>.icon { width: 32px; height: 32px; }
+  body[data-room] .results-stage { display: block; }
+  body[data-room] .result-picture { width: 100%; height: auto; }
+  body[data-room] .host-controls { padding: 12px; }
+  body[data-room] .scene-badge { bottom: 8px; left: 8px; font-size: 6px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-room] *,body[data-room] *::before,body[data-room] *::after { animation: none!important; transition: none!important; }
+  /* Keep the grid cells in place; display:none would shift the remaining tiles. */
+  body[data-room] .fine-mosaic .reveal-tile.revealed { display: block; visibility: hidden; }
+}
+@media(min-width:900px) and (max-height:850px) {
+  body[data-room] .room-header { height: 60px; }
+  body[data-room] .play-layout { max-width: 1120px; padding-top: 14px; }
+  body[data-room] .round-heading { margin-bottom: 12px; }
+  body[data-room] .question-stage h1 { font-size: 32px; margin: 8px auto 18px; }
+  body[data-room] .choice-intro { font-size: 25px; margin-bottom: 14px; }
+  body[data-room] .answer-option { min-height: 54px; font-size: 15px; }
+  body[data-room] .host-controls { margin-top: 16px; padding: 10px 15px; }
+  body[data-room] .room-bottom { margin-top: 8px; padding-top: 10px; padding-bottom: 10px; }
+  body[data-room] .game-emblem { width: 70px; height: 70px; margin: 15px auto; }
+  body[data-room] .quiz-stage .answer-option { min-height: 70px; }
+}

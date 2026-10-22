@@ -29,15 +29,15 @@ test('Each team answers once; revealing or retrying cannot award extra points', 
   assert.throws(() => act('reveal'), /no active/); assert.equal(a.score, 100);
 });
 test('Timers close questions and reject answers after the deadline', () => {
-  const { game, room, a, act, advance } = fixture(); act('start'); advance(30001);
+  const { game, room, a, act, advance } = fixture(); act('start'); advance(45001);
   assert.equal(room.phase, 'results'); assert.throws(() => game.answer(room.code, a.id, 0), /not open/);
 });
 test('Pausing freezes deadlines and reveals, resuming preserves the remaining time', () => {
   const { game, room, a, act, advance } = fixture(); act('start'); advance(7000); act('pause');
   assert.throws(() => game.answer(room.code, a.id, 0), /not open/);
   advance(60000); assert.equal(room.phase, 'question'); act('resume');
-  assert.equal(room.deadline - game.now(), 23000); assert.equal(game.now() - room.openedAt, 7000);
-  advance(23001); assert.equal(room.phase, 'results');
+  assert.equal(room.deadline - game.now(), 38000); assert.equal(game.now() - room.openedAt, 7000);
+  advance(38001); assert.equal(room.phase, 'results');
 });
 test('Crowd votes remain secret, and tied favourites both earn points', () => {
   const { game, room, a, b, act } = fixture('crowd'); act('start');
@@ -53,10 +53,10 @@ test('An empty crowd vote awards no points', () => {
 test('Memory scene hides changes during study, requires three unique choices, and gives partial credit', () => {
   const { game, room, a, b, act, advance } = fixture('changes'); act('start');
   assert.equal(game.snapshot(room, a.id).question.changed, undefined);
-  assert.throws(() => game.answer(room.code, a.id, ['balloon', 'gift', 'cup']), /not open/);
-  advance(12000); assert.equal(room.phase, 'question');
-  assert.throws(() => game.answer(room.code, a.id, ['balloon', 'balloon', 'cup']), /three different/);
-  game.answer(room.code, a.id, ['balloon', 'gift', 'cup']); game.answer(room.code, b.id, ['balloon', 'cake', 'clock']); act('reveal');
+  assert.throws(() => game.answer(room.code, a.id, ['Cushion', 'Top book', 'Wall picture']), /not open/);
+  advance(18000); assert.equal(room.phase, 'question');
+  assert.throws(() => game.answer(room.code, a.id, ['Cushion', 'Cushion', 'Top book']), /three different/);
+  game.answer(room.code, a.id, ['Cushion', 'Top book', 'Wall picture']); game.answer(room.code, b.id, ['Cushion', 'Teapot', 'Clock']); act('reveal');
   assert.equal(a.score, 100); assert.equal(b.score, 33);
 });
 test('Custom family questions replace fictional samples and are validated', () => {

@@ -3,10 +3,11 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Game, GameError } from './lib/game.js';
+import { fileStorage } from './lib/storage.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
-export function createApp() {
-  const game = new Game(), limits = new Map();
+export function createApp({ storage } = {}) {
+  const game = new Game({ storage }), limits = new Map();
   const timer = setInterval(() => game.tick(), 250); timer.unref();
   const server = http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -19,6 +20,7 @@ export function createApp() {
       if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
         if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) throw new GameError('This request must come from the game website.', 403);
         const ip = req.socket.remoteAddress; let limit = limits.get(ip);
+        if (limits.size > 1000) for (const [key, value] of limits) if (value.until < Date.now()) limits.delete(key);
         if (!limit || limit.until < Date.now()) { limit = { count: 0, until: Date.now() + 60000 }; limits.set(ip, limit); }
         if (++limit.count > 600) throw new GameError('Too many requests. Please wait a moment.', 429);
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 50000) throw new GameError('That request is too large.', 413); }
@@ -36,6 +38,7 @@ export function createApp() {
         return json({ ok: true });
       }
       const stream = url.pathname.match(/^\/api\/rooms\/(\d{6})\/events$/);
+      if (stream && req.method === 'HEAD') { game.room(stream[1]); res.writeHead(200); return res.end(); }
       if (stream && req.method === 'GET') {
         const room = game.room(stream[1]);
         if (room.listeners.size >= 120) throw new GameError('This room has reached its connection limit.', 429);
@@ -46,11 +49,11 @@ export function createApp() {
         const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 20000);
         res.on('close', () => { clearInterval(heartbeat); room.listeners.delete(send); }); return;
       }
-      if (url.pathname === '/api/health') return json({ ok: true, storage: 'ephemeral' });
+      if (url.pathname === '/api/health') return json({ ok: true, storage: storage ? 'persistent-file' : 'ephemeral' });
       if (req.method !== 'GET' && req.method !== 'HEAD') throw new GameError('Method not allowed.', 405);
       const filename = path.resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
       if (!filename.startsWith(root + path.sep)) throw new GameError('Not found.', 404);
-      const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' };
+      const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2' };
       let content; try { content = await readFile(filename); } catch { throw new GameError('Not found.', 404); }
       res.writeHead(200, { 'Content-Type': mime[path.extname(filename)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(req.method === 'HEAD' ? undefined : content);
     } catch (error) {
@@ -63,6 +66,6 @@ export function createApp() {
   return { server, game };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { server } = createApp();
+  const { server } = createApp({ storage: fileStorage(process.env.DATA_FILE || './data/rooms.json') });
   server.listen(Number(process.env.PORT) || 3000, '0.0.0.0', () => console.log(`Whoopigo is ready at http://localhost:${server.address().port}`));
 }
