@@ -1,3 +1,5 @@
+import { stageMotion, burst } from './showtime.js';
+import { cue, setSound, restoreSound } from './sound.js';
 import { icon, gameArt, mysteryArt, memoryScene } from './art.js';
 import { mosaic, sceneImage } from './stage.js';
 import { readPictures, pictureEditor } from './picture-pack.js';
@@ -16,7 +18,8 @@ const themeInfo = { chanukah: { name: 'Chanukah glow', short: 'Chanukah', icon: 
 let theme = localStorage.getItem('whoopigo-theme') || 'chanukah';
 if (!themeInfo[theme]) theme = 'chanukah';
 let sound = localStorage.getItem('whoopigo-sound') === 'on';
-let stream, current, selected = [], lastRound = '', offset = 0, busy = false, audio;
+restoreSound(sound);
+let stream, current, selected = [], lastRound = '', offset = 0, busy = false;
 const warmedImages = new Set();
 let pictures = [], pictureLoadError = '', setupDraft;
 const picturesLoaded = readPictures().then(saved => { pictures = saved; }).catch(e => { pictureLoadError = e.message; });
@@ -24,19 +27,8 @@ let custom = [];
 try { const saved = JSON.parse(localStorage.getItem('whoopigo-family') || '[]'); if (Array.isArray(saved)) custom = saved.filter(q => q && typeof q.prompt === 'string' && Array.isArray(q.options) && q.options.length === 4 && q.options.every(o => typeof o === 'string') && Number.isInteger(q.correct) && q.correct >= 0 && q.correct < 4).slice(0, 30); } catch { /* A damaged local template must not prevent the game from opening. */ }
 let toastTimer;
 function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 4500); }
-function note(type = 'tap') {
-  if (!sound) return;
-  try {
-    audio ||= new (window.AudioContext || window.webkitAudioContext)(); audio.resume();
-    const frequencies = type === 'win' ? [523, 659, 784, 1047] : type === 'reveal' ? [392, 523, 659] : [659];
-    frequencies.forEach((f, i) => { const osc = audio.createOscillator(), gain = audio.createGain(), t = audio.currentTime + i * .13; osc.type = 'sine'; osc.frequency.value = f; gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.09, t + .015); gain.gain.exponentialRampToValueAtTime(.001, t + .3); osc.connect(gain).connect(audio.destination); osc.start(t); osc.stop(t + .31); });
-  } catch { /* Sound is optional on browsers that disallow audio. */ }
-}
-function celebrate() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  $('#confetti').innerHTML = Array.from({ length: 60 }, (_, i) => `<i style="--x:${Math.random() * 100}vw;--r:${Math.random() * 720}deg;--d:${Math.random() * 1.2}s;--c:${['#ff9bc9', '#ffdc55', '#bff476', '#ae84f5'][i % 4]}"></i>`).join('');
-  setTimeout(() => $('#confetti').replaceChildren(), 5500);
-}
+function note(type = 'tap') { cue(type); }
+function celebrate(finale = false) { burst(finale); }
 async function api(path, data) {
   const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Please try again.'); return result;
@@ -132,7 +124,7 @@ async function demo() {
   } catch (e) { toast(e.message); }
 }
 function bindGlobal() {
-  document.querySelectorAll('.sound-toggle').forEach(b => b.onclick = () => { sound = !sound; localStorage.setItem('whoopigo-sound', sound ? 'on' : 'off'); b.innerHTML = icon(sound ? 'sound' : 'mute'); b.setAttribute('aria-label', `${sound ? 'Mute' : 'Enable'} sound effects`); note(); });
+  document.querySelectorAll('.sound-toggle').forEach(b => b.onclick = () => { sound = !sound; setSound(sound); localStorage.setItem('whoopigo-sound', sound ? 'on' : 'off'); b.innerHTML = icon(sound ? 'sound' : 'mute'); b.setAttribute('aria-label', `${sound ? 'Mute' : 'Enable'} sound effects`); b.title = `${sound ? 'Mute' : 'Enable'} sound effects`; note(); });
   document.querySelectorAll('[data-setup]').forEach(b => b.onclick = () => { note(); setup(b.dataset.setup); });
   document.querySelectorAll('[data-how]').forEach(b => b.onclick = how);
   document.querySelectorAll('[data-join]').forEach(b => b.onclick = () => joinDialog());
@@ -154,7 +146,7 @@ function connect(code) {
       if (!warmedImages.has(src)) { warmedImages.add(src); const img = new Image(); img.src = src; }
     }
     const round = `${data.index}/${data.phase}`;
-    if (round !== lastRound) { selected = []; if (data.phase === 'results') { note('reveal'); if (data.teams.some(t => t.earned)) celebrate(); } if (data.phase === 'finished') { note('win'); celebrate(); } lastRound = round; }
+    if (round !== lastRound) { selected = []; if (lastRound && ['question', 'study', 'vote', 'predict'].includes(data.phase)) note('start'); if (data.phase === 'results') { note('reveal'); if (data.teams.some(t => t.earned)) celebrate(); } if (data.phase === 'finished') { note('win'); celebrate(true); } lastRound = round; }
     const old = current;
     const steady = old && old.phase === data.phase && old.index === data.index && old.paused === data.paused && old.waitingForHost === data.waitingForHost && !['lobby', 'results', 'finished'].includes(data.phase) && JSON.stringify(old.me?.answer) === JSON.stringify(data.me?.answer) && (!data.practice || old.teams.find(t => t.name === 'Your table')?.answered === data.teams.find(t => t.name === 'Your table')?.answered);
     current = data; initial = false;
@@ -205,6 +197,7 @@ function renderRoom() {
   $('#app').innerHTML = top + body + bottom;
   if (typeof recordExpanded === 'boolean' && $('.projector-record')) $('.projector-record').open = recordExpanded;
   if ($('.table-record-grid')) $('.table-record-grid').scrollTop = recordScroll;
+  stageMotion(s);
   bindGlobal();
   bindProjector(s, { api, key: roomKey(s.code), modal, toast, icon, escape: esc });
   $('#fullscreen')?.addEventListener('click', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { toast('Fullscreen is not available in this browser panel.'); } });
@@ -213,7 +206,7 @@ function renderRoom() {
   $('#host-start')?.addEventListener('click', () => act('start'));
   document.querySelectorAll('[data-action]').forEach(b => b.onclick = () => act(b.dataset.action));
   document.querySelectorAll('[data-answer]').forEach(b => b.onclick = () => answer(Number(b.dataset.answer)));
-  const selectObject = key => { if (selected.includes(key)) selected = selected.filter(k => k !== key); else if (selected.length < 3) selected.push(key); else return toast('Choose three objects. Tap one again to change it.'); document.querySelectorAll('.object-option[data-object]').forEach(b => { const active = selected.includes(b.dataset.object); b.classList.toggle('selected', active); b.setAttribute('aria-pressed', String(active)); b.innerHTML = esc(b.dataset.object) + (active ? icon('check') : ''); }); document.querySelectorAll('.selection-dots i').forEach((dot, i) => { dot.classList.toggle('filled', selected.length > i); dot.textContent = selected.length > i ? '✓' : i + 1; }); $('.selection-dots')?.setAttribute('aria-label', selected.length + ' of 3 selected'); if ($('#lock-changes')) $('#lock-changes').disabled = selected.length !== 3; };
+  const selectObject = key => { note('tap'); if (selected.includes(key)) selected = selected.filter(k => k !== key); else if (selected.length < 3) selected.push(key); else return toast('Choose three objects. Tap one again to change it.'); document.querySelectorAll('.object-option[data-object]').forEach(b => { const active = selected.includes(b.dataset.object); b.classList.toggle('selected', active); b.setAttribute('aria-pressed', String(active)); b.innerHTML = esc(b.dataset.object) + (active ? icon('check') : ''); }); document.querySelectorAll('.selection-dots i').forEach((dot, i) => { dot.classList.toggle('filled', selected.length > i); dot.textContent = selected.length > i ? '✓' : i + 1; }); $('.selection-dots')?.setAttribute('aria-label', selected.length + ' of 3 selected'); if ($('#lock-changes')) $('#lock-changes').disabled = selected.length !== 3; };
   document.querySelectorAll('[data-object]').forEach(b => { b.onclick = () => selectObject(b.dataset.object); b.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); selectObject(b.dataset.object); } }; });
   $('#lock-changes')?.addEventListener('click', () => answer(selected));
   document.querySelectorAll('[data-compare]').forEach(b => b.onclick = () => {
@@ -262,7 +255,7 @@ async function act(action, confirmed = false) {
 async function answer(value) {
   if (busy) return; busy = true;
   const key = current.practice && current.role === 'host' ? localStorage.getItem(`whoopigo-team-${current.code}`) : roomKey(current.code);
-  try { await api(`/api/rooms/${current.code}/answer`, { token: key, value }); note(); }
+  try { await api(`/api/rooms/${current.code}/answer`, { token: key, value }); note('lock'); }
   catch (e) { toast(e.message); }
   finally { busy = false; renderRoom(); }
 }

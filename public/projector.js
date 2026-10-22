@@ -1,3 +1,4 @@
+import { cue } from './sound.js';
 const recordingQueues = new Map();
 
 export function tableStrip(s, esc) {
@@ -16,7 +17,7 @@ export function bindProjector(s, { api, key, modal, toast, icon, escape: esc }) 
     // Keep rapid corrections for one table in the order the host clicked them.
     const operation = (recordingQueues.get(teamId) || Promise.resolve()).catch(() => {}).then(() => api(`/api/rooms/${s.code}/host-answer`, { token: key, teamId, value, index: s.index, phase: s.phase }));
     recordingQueues.set(teamId, operation);
-    try { await operation; }
+    try { await operation; if (value !== null) cue('lock'); }
     catch (error) { toast(error.message); }
     finally { if (recordingQueues.get(teamId) === operation) recordingQueues.delete(teamId); }
   };

@@ -1,0 +1,44 @@
+/* Whoopigo showtime: dimensional paper, stage lighting and measured anticipation. */
+body[data-room] .cinematic-board { isolation:isolate; box-shadow:0 24px 50px #3e15632b,0 6px 0 #d5bae9; }
+body[data-room] .fine-mosaic { perspective:900px; }
+body[data-room] .fine-mosaic .reveal-tile { background:linear-gradient(145deg,#9864dc,#6635ad); border-color:#d2b6f54d; backface-visibility:hidden; transform-origin:50% 0; transition:transform .85s cubic-bezier(.22,.75,.2,1),opacity .7s; }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(3n) { background:linear-gradient(145deg,#b087ed,#8250c4); }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(7n) { background:linear-gradient(145deg,#d6b5ff,#a475dd); }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(11n) { background:linear-gradient(145deg,#eedbff,#b98de5); }
+body[data-room] .fine-mosaic .reveal-tile.revealed { transform:rotateX(105deg) translateY(-5px) scale(.7); opacity:0; }
+body[data-room] .fine-mosaic .reveal-tile:nth-child(2n).revealed { transform:rotateY(-100deg) translateX(4px) scale(.75); }
+body[data-room] .mosaic-seal { background:radial-gradient(circle at 35% 25%,#9958df,#542486); border:2px solid #e4bbff; box-shadow:0 0 0 9px #d8afff20,0 15px 45px #32105666; color:#ffe49a; }
+body[data-room] .mosaic-seal::before,body[data-room] .mosaic-seal::after { content:''; position:absolute; inset:-17px; border:1px dashed #e8c6ff99; border-radius:50%; animation:seal-turn 22s linear infinite; }
+body[data-room] .mosaic-seal::after { inset:-29px; border-style:solid; border-color:#e8c6ff33; animation-direction:reverse; }
+body[data-room] .reveal-progress { height:6px; }
+body[data-room] .reveal-progress i { background:linear-gradient(90deg,#9150d9,#e0a7ef,#ffd65c); box-shadow:0 0 12px #d297ee; }
+body[data-room] .answer-option { animation:show-answer .65s calc(var(--answer-index) * .085s) both cubic-bezier(.16,1,.3,1); transition:translate .2s,box-shadow .2s; }
+body[data-room] button.answer-option:not(:disabled):hover { translate:0 -4px; box-shadow:0 8px 0 #6e3d961f; }
+body[data-room] .answer-option.selected .answer-letter { animation:stamp-lock .45s cubic-bezier(.16,1,.3,1); }
+body[data-room] .game-emblem { isolation:isolate; }
+body[data-room] .game-emblem::before { content:''; position:absolute; inset:-12px; border:1px dashed #a977d67a; border-radius:34px; animation:emblem-orbit 16s linear infinite; z-index:-1; }
+body[data-room][data-game=crowd] .game-emblem::before { border-radius:50%; border:3px double #74baa4; }
+body[data-room][data-game=family] .game-emblem::before { border-radius:15px; border-color:#d98ab0; }
+body[data-room][data-game=final] .game-emblem::before { border-color:#cca43c; border-width:2px; }
+body[data-room] .result-main { position:relative; }
+body[data-room] .result-picture { position:relative; isolation:isolate; }
+body[data-room] .result-picture::after { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(105deg,transparent 30%,#fff9 49%,transparent 65%); transform:translateX(110%); animation:prize-sheen 1.35s .15s both; }
+body[data-room] .vote-track i { transform-origin:left; border-radius:inherit; background:linear-gradient(90deg,#8e52d4,#c59bed); }
+body[data-room] .vote-row.winner .vote-track i { background:linear-gradient(90deg,#b4da65,#e9ed9c); }
+body[data-room] .score-panel .earned { animation:points-rise .8s .65s both; }
+body[data-room] .correct-answer .icon { animation:stamp-lock .65s .3s both; }
+body[data-room] .winner-trophy { position:relative; isolation:isolate; }
+body[data-room] .winner-trophy::before { content:''; position:absolute; inset:-25%; z-index:-1; border-radius:50%; background:repeating-conic-gradient(from 10deg,#e6b74926 0deg 12deg,transparent 12deg 30deg); mask-image:radial-gradient(circle,black 15%,transparent 68%); animation:emblem-orbit 45s linear infinite; }
+body[data-room] .winner-name { color:#7136aa; text-shadow:0 3px 0 #e3caef; }
+body[data-room] .change-labels span { animation:show-answer .6s both; }
+body[data-room] .change-labels span:nth-child(2) { animation-delay:.12s; }
+body[data-room] .change-labels span:nth-child(3) { animation-delay:.24s; }
+.show-particle { position:absolute; width:10px; height:16px; border-radius:2px; pointer-events:none; }
+.show-star { width:19px; height:19px; clip-path:polygon(50% 0,61% 35%,100% 50%,61% 65%,50% 100%,39% 65%,0 50%,39% 35%); }
+body.show-paused .mosaic-seal::before,body.show-paused .mosaic-seal::after,body.show-paused .study-orbit,body.show-paused .game-emblem::before { animation-play-state:paused; }
+@keyframes show-answer { from{opacity:0;transform:translateY(20px) rotateX(-8deg)} to{opacity:1;transform:translateY(0) rotateX(0)} }
+@keyframes stamp-lock { 0%{transform:scale(.5) rotate(-12deg);opacity:0} 65%{transform:scale(1.15) rotate(4deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+@keyframes prize-sheen { from{transform:translateX(-110%)} to{transform:translateX(110%)} }
+@keyframes points-rise { from{opacity:0;transform:translateY(16px) scale(.8)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes emblem-orbit { to{rotate:360deg} }
+@media(prefers-reduced-motion:reduce) { body[data-room] *,body[data-room] *::before,body[data-room] *::after{animation:none!important;transition:none!important}.show-particle{display:none}body[data-room] .result-picture::after{display:none} }
