@@ -46,6 +46,9 @@ export function stageMotion(s) {
       { duration: 650, delay: 250 + Math.min(i, 10) * 65, fill: 'backwards' }));
   }
   if (s.phase === 'finished') {
+    document.querySelectorAll('.podium-place').forEach((place, i) => animate(place,
+      [{ opacity: 0, transform: 'translateY(45px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 850, delay: 350 + i * 160, fill: 'backwards' }));
     animate(find('.winner-trophy'), [
       { opacity: 0, transform: 'translateY(65px) scale(.45) rotate(-18deg)' },
       { opacity: 1, transform: 'translateY(-8px) scale(1.06) rotate(4deg)', offset: .7 },
